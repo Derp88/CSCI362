@@ -1,16 +1,17 @@
 #include <iostream>
+#include <vector>
 
 //Function Prototypes
 void SelectionSort();
 void printList();
 
-int listOfInts[10];
+std::vector<int> listOfInts;
 
 void SelectionSort(){
     int smallestFoundIntIndex;
-    for (int currentIndex = 0; currentIndex < 9; currentIndex++){
+    for (int currentIndex = 0; currentIndex < listOfInts.size()-1; currentIndex++){
         smallestFoundIntIndex = currentIndex; //Our current number is the smallest number as we have not compared any yet.
-        for (int comparisonIndex = (currentIndex + 1); comparisonIndex < 10; comparisonIndex++){
+        for (int comparisonIndex = (currentIndex + 1); comparisonIndex < listOfInts.size(); comparisonIndex++){
             if (listOfInts[comparisonIndex] < listOfInts[smallestFoundIntIndex]){ //If the number we are comparing against is smaller then the smallest number we have found(cont).
                 smallestFoundIntIndex = comparisonIndex; //Set our newest smallest number to it.
             }
@@ -22,10 +23,9 @@ void SelectionSort(){
     }
 }
 
-
 void printList(){
     std::cout << "Your list: ";
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < listOfInts.size(); i++){
         std::cout << listOfInts[i] << " ";
     }
     std::cout << std::endl;
@@ -33,10 +33,12 @@ void printList(){
 
 int main(){
     int inputInt;
-    for (int i = 0; i < 10; i++){
-        std::cout << "Entering number " << i+1 << " out of 10" << std::endl;
+    while (inputInt != 0){
+        std::cout << "Entering a number, enter 0 to stop." << std::endl;
         std::cin >> inputInt;
-        listOfInts[i] = inputInt;
+        if (inputInt != 0){
+            listOfInts.emplace_back(inputInt);
+        }
     }
     SelectionSort();
     printList();
