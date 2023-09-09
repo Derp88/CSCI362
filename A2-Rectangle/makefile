@@ -7,6 +7,8 @@ main.o: main.cpp
 clean:
 	rm *.o
 	rm rectangle
+	rm *.csv
+	rm *.png
 
 run: rectangle
 	./rectangle
