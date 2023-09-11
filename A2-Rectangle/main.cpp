@@ -71,13 +71,6 @@ void rectangleGenerator(int currentShapeInt){
     double slope = rise/run;
     //double slope = ((listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]) / (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0]));
     while (slope == 0 || std::isnan(slope)){
-        std::cout << "############GOT A BAD SLOPE. REDO########" << slope << std::endl;
-        std::cout << "Point 1 X: " << listOfShapes[currentShapeInt].xPoints[0] << "," << listOfShapes[currentShapeInt].yPoints[0] << " radius: " << listOfShapes[currentShapeInt].radius << std::endl;
-        std::cout << "Point 2 X: " << listOfShapes[currentShapeInt].xPoints[1] << "," << listOfShapes[currentShapeInt].yPoints[1] << " Slope: " << slope << std::endl;
-        std::cout << "Point 3 X: " << listOfShapes[currentShapeInt].xPoints[2] << "," << listOfShapes[currentShapeInt].yPoints[2] << std::endl;
-        std::cout << "Point 4 X: " << listOfShapes[currentShapeInt].xPoints[3] << "," << listOfShapes[currentShapeInt].yPoints[3] << std::endl;
-        std::cout << "Y TERM " << (listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]) << std::endl;
-        std::cout << "X TERM " << (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0]) << std::endl;
         std::cout << "FULL TERM " << ((listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]) / (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0])) << std::endl;
         setRandomPoint(currentShapeInt, 0);
         setRandomPoint(currentShapeInt, 1);
@@ -107,10 +100,6 @@ void rectangleGenerator(int currentShapeInt){
     }
     listOfShapes[currentShapeInt].xPoints[3] = listOfShapes[currentShapeInt].xPoints[2] + (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0]);
     listOfShapes[currentShapeInt].yPoints[3] = listOfShapes[currentShapeInt].yPoints[2] + (listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]);
-    std::cout << "Point 1 X: " << listOfShapes[currentShapeInt].xPoints[0] << "," << listOfShapes[currentShapeInt].yPoints[0] << " radius: " << listOfShapes[currentShapeInt].radius << std::endl;
-    std::cout << "Point 2 X: " << listOfShapes[currentShapeInt].xPoints[1] << "," << listOfShapes[currentShapeInt].yPoints[1] << " Slope: " << slope << " Perp slope: " << perpSlope << std::endl;
-    std::cout << "Point 3 X: " << listOfShapes[currentShapeInt].xPoints[2] << "," << listOfShapes[currentShapeInt].yPoints[2] << std::endl;
-    std::cout << "Point 4 X: " << listOfShapes[currentShapeInt].xPoints[3] << "," << listOfShapes[currentShapeInt].yPoints[3] << std::endl;
 }
 void setRandomPoint(int currentShapeInt, int pointToSet){ 
     //Use polar coords first, then to cartesian
