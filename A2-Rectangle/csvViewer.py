@@ -37,7 +37,7 @@ for circle in rows:
     Ys = [y1, y2, y4, y3, y1]
     plt.plot(Xs, Ys)
 
-
+plt.plot(0,0, marker="x", color="red")
 plt.xlim(-275, 275)
 plt.ylim(-275, 275)
 plt.show()

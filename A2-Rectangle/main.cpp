@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <algorithm>
 class shapeObject {
     public:
         int X;
@@ -9,23 +10,40 @@ class shapeObject {
         int radius;
         double xPoints[4] = {0.0,0.0,0.0,0.0};
         double yPoints[4] = {0.0,0.0,0.0,0.0};
+        double minTheta;
+        double maxTheta;
+};
+class occlusionObject{
+    public:
+        double minTheta;
+        double maxTheta;
 };
 //Function prototypes
 void circleGenerator();
+bool overlap(int, int, int);
 void rectangleGenerator(int);
 void setRandomPoint(int, int);
+void caluclateRectangleThetas(int);
+bool rectanglesOcclude(shapeObject, shapeObject);
+void finalAllOcclusion(int);
+void storeOcclusionNoOverlap(double, double);
+void outputTotalOcclusionAngle();
 void printCircles();
-bool inRange(int, int, int);
-bool overlap(int, int, int);
 void outputShapeCSV();
+bool inRange(double, double, double);
+
+//int runCounter;
 
 //PLEASE NOTE
 //THE DRAWING LIBRARY SOMETIMES RENDERS OVERLAPS
 //THEY ARE NOT ACTUALLY OVERLAPPING. I CHECKED.
 
 std::vector<shapeObject> listOfShapes;
+std::vector<occlusionObject> listOfOcclusion;
 
 void circleGenerator(){
+    //std::cout << "Run: " <<runCounter << std::endl;
+    //runCounter++;
     //Generate a random center, starting in the bottom left, adding up to 500. (Bounds 250 in each direction)
     int centerX = -250 + (rand() % 500);
     int centerY = -250 + (rand() % 500);
@@ -53,9 +71,6 @@ bool overlap(int x, int y, int radius){
         //Check to see if the combined radius is greater than the distance between them, if so, means overlap
         if (combinedRadius >= distance){
             overlapDetected = true;
-            std::cout << "Overlap Detected! Comb Radis: " << combinedRadius << " Distance: " << distance << std::endl;
-            std::cout << "Circle Old: " << " X: " << listOfShapes[i].X << " Y: " <<  listOfShapes[i].Y << " r: " <<  listOfShapes[i].radius << std::endl;;
-            std::cout << "Circle New: " << " X: " << x << " Y: " <<  y << " r: " <<  radius << std::endl;
         }
     }
     return overlapDetected;
@@ -69,9 +84,8 @@ void rectangleGenerator(int currentShapeInt){
     double rise = (listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]);
     double run = (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0]);
     double slope = rise/run;
-    //double slope = ((listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]) / (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0]));
     while (slope == 0 || std::isnan(slope)){
-        std::cout << "FULL TERM " << ((listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]) / (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0])) << std::endl;
+        //std::cout << "Bad Slope Generation: " << ((listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]) / (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0])) << std::endl;
         setRandomPoint(currentShapeInt, 0);
         setRandomPoint(currentShapeInt, 1);
         rise = (listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]);
@@ -88,18 +102,20 @@ void rectangleGenerator(int currentShapeInt){
         double distance = std::sqrt( std::pow((point3X - listOfShapes[currentShapeInt].X), 2) + std::pow((point3Y - listOfShapes[currentShapeInt].Y),2)); //Find distance from third point to center 
         //Check to see if the combined radius is greater than the distance between them, if so, means overlap
         if (listOfShapes[currentShapeInt].radius >= distance){
-            std::cout << "Third point Detected!" << std::endl; //<< combinedRadius << " Distance: " << distance << std::endl;
+            //std::cout << "Third point Detected!" << std::endl; //<< combinedRadius << " Distance: " << distance << std::endl;
             foundThirdPoint = true;
             listOfShapes[currentShapeInt].xPoints[2] = point3X;
             listOfShapes[currentShapeInt].yPoints[2] = point3Y;
         }else{
-            std::cout << "Third point Fail. RAD: " << listOfShapes[currentShapeInt].radius << "DIS: " << distance << " P3X: " << point3X << " P3Y:" << point3Y << " PERP SLOPE: " << perpSlope << " SLOPE: " << slope
-            << " X1: " << listOfShapes[currentShapeInt].xPoints[0] << " X2: " << listOfShapes[currentShapeInt].xPoints[1] << " Y1: " << listOfShapes[currentShapeInt].yPoints[0] << " Y2: " << listOfShapes[currentShapeInt].yPoints[1];
-            std::cout << std::endl;
+            //std::cout << "Third point Fail. RAD: " << listOfShapes[currentShapeInt].radius << "DIS: " << distance << " P3X: " << point3X << " P3Y:" << point3Y << " PERP SLOPE: " << perpSlope << " SLOPE: " << slope
+            //<< " X1: " << listOfShapes[currentShapeInt].xPoints[0] << " X2: " << listOfShapes[currentShapeInt].xPoints[1] << " Y1: " << listOfShapes[currentShapeInt].yPoints[0] << " Y2: " << listOfShapes[currentShapeInt].yPoints[1];
+            //std::cout << std::endl;
         }
     }
     listOfShapes[currentShapeInt].xPoints[3] = listOfShapes[currentShapeInt].xPoints[2] + (listOfShapes[currentShapeInt].xPoints[1] - listOfShapes[currentShapeInt].xPoints[0]);
     listOfShapes[currentShapeInt].yPoints[3] = listOfShapes[currentShapeInt].yPoints[2] + (listOfShapes[currentShapeInt].yPoints[1] - listOfShapes[currentShapeInt].yPoints[0]);
+    //std::cout << "Generated rectangle [" << currentShapeInt+1 << "]" << std::endl;
+    caluclateRectangleThetas(currentShapeInt);
 }
 void setRandomPoint(int currentShapeInt, int pointToSet){ 
     //Use polar coords first, then to cartesian
@@ -108,8 +124,127 @@ void setRandomPoint(int currentShapeInt, int pointToSet){
     double thetaRadians = theta * (M_PI/180);
     listOfShapes[currentShapeInt].xPoints[pointToSet] = listOfShapes[currentShapeInt].X + r * cos(thetaRadians);
     listOfShapes[currentShapeInt].yPoints[pointToSet] = listOfShapes[currentShapeInt].Y + r * sin(thetaRadians);
-    std::cout << "Point set at: X: " << listOfShapes[currentShapeInt].xPoints[pointToSet] << " Y: " << listOfShapes[currentShapeInt].yPoints[pointToSet] << std::endl;
+    //std::cout << "Point set at: X: " << listOfShapes[currentShapeInt].xPoints[pointToSet] << " Y: " << listOfShapes[currentShapeInt].yPoints[pointToSet] << std::endl;
     //std::cout << "On Circle of: X: " << listOfShapes[currentShapeInt].X << " Y: " << listOfShapes[currentShapeInt].Y << " radius: " <<listOfShapes[currentShapeInt].radius << std::endl;
+}
+
+void caluclateRectangleThetas(int currentShapeInt){
+    double thetaList[4];
+    for (int i = 0; i < 4; i++){
+        double theta = (180/M_PI) * (std::atan2(listOfShapes[currentShapeInt].yPoints[i], listOfShapes[currentShapeInt].xPoints[i]));
+        theta = std::fmod((theta + 360), 360.00);
+        thetaList[i] = theta;
+        //std::cout << "ANGLE: " << theta << " (x,y): " << listOfShapes[currentShapeInt].xPoints[i] << "," << listOfShapes[currentShapeInt].yPoints[i] << std::endl;
+    }
+    std::sort(std::begin(thetaList), std::end(thetaList));
+    listOfShapes[currentShapeInt].minTheta = thetaList[0];
+    listOfShapes[currentShapeInt].maxTheta = thetaList[3];
+    //for (int i = 0; i < 4; i++){
+    //    std::cout << "ANGLE: " << thetaList[i] << std::endl;
+    //}
+}
+bool rectanglesOcclude(shapeObject firstRect, shapeObject secondRect){
+    bool overlap = false;
+
+    if (inRange(firstRect.minTheta, firstRect.maxTheta, secondRect.minTheta)){
+        overlap = true;
+    }
+    if (inRange(firstRect.minTheta, firstRect.maxTheta, secondRect.maxTheta)){
+        overlap = true;
+    }
+    
+    return overlap;
+}
+void finalAllOcclusion(int intNumOfRects){
+    double largestMinTheta = 0.0;
+    double smallestMaxTheta = 0.0;
+    //For every rectangle, check against every other rectangle
+    for (int currentRec = 0; currentRec < intNumOfRects ; currentRec++){
+        for (int comparisonRec = 0; comparisonRec < intNumOfRects ; comparisonRec++){
+            if (currentRec != comparisonRec){ //Do not want to check against ourself
+                if (rectanglesOcclude(listOfShapes[currentRec], listOfShapes[comparisonRec])){ //Check to see if there is an overlap
+                    //std::cout << "Overlap Detected" << std::endl;
+                    if (listOfShapes[currentRec].minTheta > listOfShapes[comparisonRec].minTheta){//Check to see which rectangle has the largest minTheta
+                        largestMinTheta = listOfShapes[currentRec].minTheta;
+                    }else{
+                        largestMinTheta = listOfShapes[comparisonRec].minTheta;
+                    }
+
+                    if (listOfShapes[currentRec].maxTheta < listOfShapes[comparisonRec].maxTheta){//Check to see which rectangle has the smallest maxTheta
+                        smallestMaxTheta = listOfShapes[currentRec].maxTheta;
+                    }else{
+                        smallestMaxTheta = listOfShapes[comparisonRec].maxTheta;
+                    }
+                    storeOcclusionNoOverlap(largestMinTheta, smallestMaxTheta);
+                }
+            }
+        }
+    }
+}
+void storeOcclusionNoOverlap(double minTheta, double maxTheta){
+    //listOfOcclusion
+    //Case 1, our added angle is already partly/fully covered. So we need to update a current object.
+    //Case 2, our new angle is unique, so we need to create a new object.
+    //Check for every object already in the list
+    bool overlap = false;
+    //bool dupe = false;
+    //std::cout << "Started storing process of: " << minTheta << " " << maxTheta << std::endl;
+    for (int i = 0; i < listOfOcclusion.size(); i++){
+        overlap = false;
+        if (inRange(listOfOcclusion[i].minTheta, listOfOcclusion[i].maxTheta, minTheta)){
+            //std::cout << "i: " << i << " OVERLAP: minTheta of " << minTheta << " inside of: " << listOfOcclusion[i].minTheta << " to " << listOfOcclusion[i].maxTheta << std::endl;
+            overlap = true;
+        }
+        if (inRange(listOfOcclusion[i].minTheta, listOfOcclusion[i].maxTheta, maxTheta)){
+            //std::cout << "i: " << i << " OVERLAP:  maxTheta of " << maxTheta << " inside of: " << listOfOcclusion[i].minTheta << " to " << listOfOcclusion[i].maxTheta << std::endl;
+            overlap = true;
+        }
+    
+        if (overlap){
+            //std::cout << "Found overlap" << std::endl;
+            //If the new angle has a smaller min theta, set it to that
+            if (minTheta < listOfOcclusion[i].minTheta){
+                //std::cout << "i: " << i << "###EXPANDING: Old minTheta: " << listOfOcclusion[i].minTheta << " New minTheta: " << minTheta << std::endl;
+                listOfOcclusion[i].minTheta = minTheta;
+                
+            }
+            //If the new angle has a larger max theta,  set it to that
+            if (maxTheta > listOfOcclusion[i].maxTheta){
+                //std::cout << "i: " << i << "###EXPANDING: Old maxTheta: " << listOfOcclusion[i].maxTheta << " New maxTheta: " << maxTheta << std::endl;
+                listOfOcclusion[i].maxTheta = maxTheta;
+            }
+        }
+    }
+    if (!overlap){
+        
+        occlusionObject newOcclusionObj;
+        newOcclusionObj.minTheta = minTheta;
+        newOcclusionObj.maxTheta = maxTheta;
+        //std::cout << "Generated a new obj with:" << minTheta << " " << maxTheta << std::endl;
+        listOfOcclusion.emplace_back(newOcclusionObj);
+    }else{
+        std::cout << "OVERLAP WAS DETECTED" << std::endl;
+    }
+}
+void outputTotalOcclusionAngle(){
+    double totalAngle = 0;
+    for (int i = 0; i < listOfOcclusion.size(); i++){
+        for (int j = 0; j < listOfOcclusion.size(); j++){
+            if (i != j){
+                if(inRange(listOfOcclusion[j].minTheta, listOfOcclusion[j].maxTheta, listOfOcclusion[i].maxTheta)){
+                //std::cout << "CONDUCTOR WE HAVE A PROBLEM!" << std::endl;
+                }
+                if(inRange(listOfOcclusion[j].minTheta, listOfOcclusion[j].maxTheta, listOfOcclusion[i].minTheta)){
+                    //std::cout << "CONDUCTOR WE HAVE A PROBLEM!" << std::endl;
+                }
+            }
+            
+        }
+        double displacment = listOfOcclusion[i].maxTheta - listOfOcclusion[i].minTheta;
+        totalAngle = totalAngle + displacment;
+        //std::cout << "Item [" << i << "]: MIN: " << listOfOcclusion[i].minTheta << " MAX: " << listOfOcclusion[i].maxTheta << " TOTAL: " << totalAngle <<std::endl;
+    }
+    std::cout << "***Total Occlusion Angle is: " << totalAngle << std::endl;
 }
 
 void printCircles(){
@@ -132,7 +267,7 @@ void outputShapeCSV(){
     }
     outputFile.close();
 }
-bool inRange(int firstBound, int secondBound, int between){
+bool inRange(double firstBound, double secondBound, double between){
     if (firstBound < secondBound){
         return (firstBound <= between && between <= secondBound);
     }else{
@@ -150,7 +285,10 @@ int main(){
         rectangleGenerator(i); //Now to make a rectangle with this circle.
     }
     //printCircles();
+    finalAllOcclusion(intNumOfRects);
+    outputTotalOcclusionAngle();
     outputShapeCSV();
     system("python3 csvViewer.py");
+
     return 0;
 }
