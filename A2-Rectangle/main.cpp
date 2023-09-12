@@ -26,7 +26,8 @@ void setRandomPoint(int, int);
 void caluclateRectangleThetas(int);
 bool rectanglesOcclude(shapeObject, shapeObject);
 void finalAllOcclusion(int);
-void storeOcclusionNoOverlap(double, double);
+void storeOcclusionAngles(double, double);
+void sortOcclusionAngles();
 void outputTotalOcclusionAngle();
 void printCircles();
 void outputShapeCSV();
@@ -40,6 +41,7 @@ bool inRange(double, double, double);
 
 std::vector<shapeObject> listOfShapes;
 std::vector<occlusionObject> listOfOcclusion;
+//std::vector<occlusionObject> listOfOcclusionNoOverlap;
 
 void circleGenerator(){
     //std::cout << "Run: " <<runCounter << std::endl;
@@ -175,67 +177,59 @@ void finalAllOcclusion(int intNumOfRects){
                     }else{
                         smallestMaxTheta = listOfShapes[comparisonRec].maxTheta;
                     }
-                    storeOcclusionNoOverlap(largestMinTheta, smallestMaxTheta);
+                    storeOcclusionAngles(largestMinTheta, smallestMaxTheta);
                 }
             }
         }
     }
 }
-void storeOcclusionNoOverlap(double minTheta, double maxTheta){
-    //listOfOcclusion
-    //Case 1, our added angle is already partly/fully covered. So we need to update a current object.
-    //Case 2, our new angle is unique, so we need to create a new object.
-    //Check for every object already in the list
-    bool overlap = false;
-    //bool dupe = false;
-    //std::cout << "Started storing process of: " << minTheta << " " << maxTheta << std::endl;
-    for (int i = 0; i < listOfOcclusion.size(); i++){
-        overlap = false;
-        if (inRange(listOfOcclusion[i].minTheta, listOfOcclusion[i].maxTheta, minTheta)){
-            //std::cout << "i: " << i << " OVERLAP: minTheta of " << minTheta << " inside of: " << listOfOcclusion[i].minTheta << " to " << listOfOcclusion[i].maxTheta << std::endl;
-            overlap = true;
-        }
-        if (inRange(listOfOcclusion[i].minTheta, listOfOcclusion[i].maxTheta, maxTheta)){
-            //std::cout << "i: " << i << " OVERLAP:  maxTheta of " << maxTheta << " inside of: " << listOfOcclusion[i].minTheta << " to " << listOfOcclusion[i].maxTheta << std::endl;
-            overlap = true;
-        }
-    
-        if (overlap){
-            //std::cout << "Found overlap" << std::endl;
-            //If the new angle has a smaller min theta, set it to that
-            if (minTheta < listOfOcclusion[i].minTheta){
-                //std::cout << "i: " << i << "###EXPANDING: Old minTheta: " << listOfOcclusion[i].minTheta << " New minTheta: " << minTheta << std::endl;
-                listOfOcclusion[i].minTheta = minTheta;
-                
+void storeOcclusionAngles(double minTheta, double maxTheta){
+    occlusionObject newOcclusionObj;
+    newOcclusionObj.minTheta = minTheta;
+    newOcclusionObj.maxTheta = maxTheta;
+    listOfOcclusion.emplace_back(newOcclusionObj);
+}
+int runTimes = 0;
+void sortOcclusionAngles(){
+    for (int curRect = 0; curRect < listOfOcclusion.size(); curRect++){
+        for (int compRect = 0; compRect < listOfOcclusion.size(); compRect++){
+            //Check to make sure we don't compare against ourself
+            runTimes++;
+            if (curRect != compRect){
+                bool overlap = false;
+                if(inRange(listOfOcclusion[compRect].minTheta, listOfOcclusion[compRect].maxTheta, listOfOcclusion[curRect].minTheta)){
+                    overlap = true;
+                }
+                if(inRange(listOfOcclusion[compRect].minTheta, listOfOcclusion[compRect].maxTheta, listOfOcclusion[curRect].maxTheta)){
+                    overlap = true;
+                }
+                if(overlap){
+                    if(listOfOcclusion[curRect].minTheta > listOfOcclusion[compRect].minTheta){
+                        listOfOcclusion[curRect].minTheta = listOfOcclusion[compRect].minTheta;
+                    }
+                    if(listOfOcclusion[curRect].maxTheta < listOfOcclusion[compRect].maxTheta){
+                        listOfOcclusion[curRect].maxTheta = listOfOcclusion[compRect].maxTheta;
+                    }
+                    listOfOcclusion.erase(listOfOcclusion.begin() + compRect);
+                    sortOcclusionAngles(); //If there is an overlap, we might need to sort again after expanding.
+                }
             }
-            //If the new angle has a larger max theta,  set it to that
-            if (maxTheta > listOfOcclusion[i].maxTheta){
-                //std::cout << "i: " << i << "###EXPANDING: Old maxTheta: " << listOfOcclusion[i].maxTheta << " New maxTheta: " << maxTheta << std::endl;
-                listOfOcclusion[i].maxTheta = maxTheta;
-            }
         }
-    }
-    if (!overlap){
-        
-        occlusionObject newOcclusionObj;
-        newOcclusionObj.minTheta = minTheta;
-        newOcclusionObj.maxTheta = maxTheta;
-        //std::cout << "Generated a new obj with:" << minTheta << " " << maxTheta << std::endl;
-        listOfOcclusion.emplace_back(newOcclusionObj);
-    }else{
-        std::cout << "OVERLAP WAS DETECTED" << std::endl;
     }
 }
 void outputTotalOcclusionAngle(){
+    sortOcclusionAngles();
     double totalAngle = 0;
     for (int i = 0; i < listOfOcclusion.size(); i++){
         for (int j = 0; j < listOfOcclusion.size(); j++){
             if (i != j){
                 if(inRange(listOfOcclusion[j].minTheta, listOfOcclusion[j].maxTheta, listOfOcclusion[i].maxTheta)){
-                //std::cout << "CONDUCTOR WE HAVE A PROBLEM!" << std::endl;
+                    std::cout << "Org [" << i << "]: MIN: " << listOfOcclusion[i].minTheta << " MAX: " << listOfOcclusion[i].maxTheta <<std::endl;
+                    std::cout << "Comp [" << j << "]: MIN: " << listOfOcclusion[j].minTheta << " MAX: " << listOfOcclusion[j].maxTheta <<std::endl;
                 }
                 if(inRange(listOfOcclusion[j].minTheta, listOfOcclusion[j].maxTheta, listOfOcclusion[i].minTheta)){
-                    //std::cout << "CONDUCTOR WE HAVE A PROBLEM!" << std::endl;
+                    std::cout << "Org [" << i << "]: MIN: " << listOfOcclusion[i].minTheta << " MAX: " << listOfOcclusion[i].maxTheta <<std::endl;
+                    std::cout << "Comp [" << j << "]: MIN: " << listOfOcclusion[j].minTheta << " MAX: " << listOfOcclusion[j].maxTheta <<std::endl;
                 }
             }
             
@@ -245,6 +239,7 @@ void outputTotalOcclusionAngle(){
         //std::cout << "Item [" << i << "]: MIN: " << listOfOcclusion[i].minTheta << " MAX: " << listOfOcclusion[i].maxTheta << " TOTAL: " << totalAngle <<std::endl;
     }
     std::cout << "***Total Occlusion Angle is: " << totalAngle << std::endl;
+    std::cout << "Run times: " << runTimes << std::endl;
 }
 
 void printCircles(){
