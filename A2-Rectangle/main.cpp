@@ -41,7 +41,7 @@ bool inRange(double, double, double);
 
 std::vector<shapeObject> listOfShapes;
 std::vector<occlusionObject> listOfOcclusion;
-//std::vector<occlusionObject> listOfOcclusionNoOverlap;
+std::vector<occlusionObject> listOfOcclusionNoOverlap;
 
 void circleGenerator(){
     //std::cout << "Run: " <<runCounter << std::endl;
@@ -189,8 +189,28 @@ void storeOcclusionAngles(double minTheta, double maxTheta){
     newOcclusionObj.maxTheta = maxTheta;
     listOfOcclusion.emplace_back(newOcclusionObj);
 }
+bool compareMinThetas(occlusionObject first, occlusionObject second){
+    return (first.minTheta < second.minTheta);
+}
+
+
 int runTimes = 0;
 void sortOcclusionAngles(){
+    std::sort(listOfOcclusion.begin(), listOfOcclusion.end(), compareMinThetas);
+    listOfOcclusionNoOverlap.emplace_back(listOfOcclusion[0]);
+    for (int i = 1; i < listOfOcclusion.size(); i++){
+        if (listOfOcclusionNoOverlap.back().maxTheta < listOfOcclusion[i].minTheta){ //If our last value in our combined list is less than our current start value
+            listOfOcclusionNoOverlap.emplace_back(listOfOcclusion[i]);               //Add it to the combined list
+        } else if(listOfOcclusionNoOverlap.back().maxTheta == listOfOcclusion[i].minTheta){ //Catch in case both have the same value
+            listOfOcclusionNoOverlap.back().maxTheta = listOfOcclusion[i].maxTheta;
+        }
+        if (listOfOcclusion[i].maxTheta > listOfOcclusionNoOverlap.back().maxTheta){ //Our current max theta is larger than the one in the list
+            listOfOcclusionNoOverlap.back().maxTheta = listOfOcclusion[i].maxTheta;  //So, set the combined list to the larger max theta
+        }
+    }
+    //Not used anymore, but keeping in to show previous method not using c++ build in sorting algo.
+}
+void sortOcclusionAnglesOLD(){
     for (int curRect = 0; curRect < listOfOcclusion.size(); curRect++){
         for (int compRect = 0; compRect < listOfOcclusion.size(); compRect++){
             //Check to make sure we don't compare against ourself
@@ -211,34 +231,45 @@ void sortOcclusionAngles(){
                         listOfOcclusion[curRect].maxTheta = listOfOcclusion[compRect].maxTheta;
                     }
                     listOfOcclusion.erase(listOfOcclusion.begin() + compRect);
-                    sortOcclusionAngles(); //If there is an overlap, we might need to sort again after expanding.
+                    sortOcclusionAnglesOLD(); //If there is an overlap, we might need to sort again after expanding.
                 }
             }
         }
     }
+    
 }
 void outputTotalOcclusionAngle(){
     sortOcclusionAngles();
+    
     double totalAngle = 0;
-    for (int i = 0; i < listOfOcclusion.size(); i++){
-        for (int j = 0; j < listOfOcclusion.size(); j++){
+    double totalAngleOLD = 0;
+    for (int i = 0; i < listOfOcclusionNoOverlap.size(); i++){
+        for (int j = 0; j < listOfOcclusionNoOverlap.size(); j++){
             if (i != j){
-                if(inRange(listOfOcclusion[j].minTheta, listOfOcclusion[j].maxTheta, listOfOcclusion[i].maxTheta)){
+                if(inRange(listOfOcclusionNoOverlap[j].minTheta, listOfOcclusionNoOverlap[j].maxTheta, listOfOcclusionNoOverlap[i].maxTheta)){
                     std::cout << "Org [" << i << "]: MIN: " << listOfOcclusion[i].minTheta << " MAX: " << listOfOcclusion[i].maxTheta <<std::endl;
                     std::cout << "Comp [" << j << "]: MIN: " << listOfOcclusion[j].minTheta << " MAX: " << listOfOcclusion[j].maxTheta <<std::endl;
                 }
-                if(inRange(listOfOcclusion[j].minTheta, listOfOcclusion[j].maxTheta, listOfOcclusion[i].minTheta)){
+                if(inRange(listOfOcclusionNoOverlap[j].minTheta, listOfOcclusionNoOverlap[j].maxTheta, listOfOcclusionNoOverlap[i].minTheta)){
                     std::cout << "Org [" << i << "]: MIN: " << listOfOcclusion[i].minTheta << " MAX: " << listOfOcclusion[i].maxTheta <<std::endl;
                     std::cout << "Comp [" << j << "]: MIN: " << listOfOcclusion[j].minTheta << " MAX: " << listOfOcclusion[j].maxTheta <<std::endl;
                 }
             }
             
         }
-        double displacment = listOfOcclusion[i].maxTheta - listOfOcclusion[i].minTheta;
+        double displacment = listOfOcclusionNoOverlap[i].maxTheta - listOfOcclusionNoOverlap[i].minTheta;
         totalAngle = totalAngle + displacment;
-        //std::cout << "Item [" << i << "]: MIN: " << listOfOcclusion[i].minTheta << " MAX: " << listOfOcclusion[i].maxTheta << " TOTAL: " << totalAngle <<std::endl;
+        std::cout << "Item [" << i << "]: MIN: " << listOfOcclusionNoOverlap[i].minTheta << " MAX: " << listOfOcclusionNoOverlap[i].maxTheta << " TOTAL: " << totalAngle <<std::endl;
+    
+    }
+    sortOcclusionAnglesOLD();
+    for (int i = 0; i < listOfOcclusion.size(); i++){
+        //TODO: temp delete after please
+        double displacmentOLD = listOfOcclusion[i].maxTheta - listOfOcclusion[i].minTheta;
+        totalAngleOLD = totalAngleOLD + displacmentOLD;
     }
     std::cout << "***Total Occlusion Angle is: " << totalAngle << std::endl;
+    std::cout << "***Total Occlusion Angle is: " << totalAngleOLD << " OLD METHOD" << std::endl;
     std::cout << "Run times: " << runTimes << std::endl;
 }
 
