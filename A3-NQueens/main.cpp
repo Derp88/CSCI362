@@ -2,6 +2,7 @@
 #include <stack>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 
 bool sorted;
 int filledRows;
@@ -10,13 +11,13 @@ struct queen{
     int columnX;  
 };
 
-
 void queenMain(int);
 bool isConflict(std::stack<queen>, int);
 std::stack<queen> addQueen(int, int, std::stack<queen>);
 bool canShiftRight(std::stack<queen>, int);
 
 void outputStack(std::stack<queen>);
+void outputCSV(std::stack<queen>);
 
 bool isConflict(std::stack<queen> checkStack, int numOfQueen){ //Check if the top of the queen stack.
     std::vector<int> occupiedRowY;
@@ -81,15 +82,14 @@ void queenMain(int numOfQueen){
                 int previousRow = queenStack.top().rowY;
                 queenStack = addQueen(0,previousRow+1,queenStack);
             }
-        }else if (isConflict && (queenStack.top().columnX < numOfQueen-1)){ //There is an active conflict and e have room to shift the column right
-            std::cout << "Shifting right, because we can." << std::endl;
+        }else if (isConflict(queenStack, numOfQueen) && canShiftRight(queenStack, numOfQueen)){ //There is an active conflict and e have room to shift the column right
             int currentColumn = queenStack.top().columnX;
             int currentRow = queenStack.top().rowY;
             queenStack.pop(); //Get rid of the old conflicting queen.
             queenStack = addQueen(currentColumn+1,currentRow,queenStack); //Create a new queen one right of the old one.
         }
-        else if (isConflict && !(queenStack.top().columnX < numOfQueen-1)){ //Conflict and we cannot shift right.
-            while (!(queenStack.top().columnX < numOfQueen-1)){
+        else if (isConflict(queenStack, numOfQueen) && !canShiftRight(queenStack, numOfQueen)){ //Conflict and we cannot shift right.
+            while (!canShiftRight(queenStack, numOfQueen)){ //While we can't shift the current queen to the right, keep removing until we can.
                 queenStack.pop();
                 filledRows = filledRows - 1;
             }
@@ -97,20 +97,10 @@ void queenMain(int numOfQueen){
             int currentRow = queenStack.top().rowY;
             queenStack.pop(); //Get rid of the old conflicting queen.
             queenStack = addQueen(currentColumn+1,currentRow,queenStack); //Create a new queen one right of the old one.
-            /*
-            queenStack.pop();
-            filledRows = filledRows - 1;
-            if (queenStack.top().columnX < numOfQueen-1){
-                std::cout << "@Moving an old queen!" << std::endl;
-                    
-                int currentColumn = queenStack.top().columnX;
-                int currentRow = queenStack.top().rowY;
-                queenStack.pop(); //Get rid of the old conflicting queen.
-                queenStack = addQueen(currentColumn+1,currentRow,queenStack); //Create a new queen one right of the old one.
-            }*/
         }
     }
     outputStack(queenStack);
+    outputCSV(queenStack);
 }
 void outputStack(std::stack<queen> outputStack){
     int counter = 0;
@@ -122,12 +112,22 @@ void outputStack(std::stack<queen> outputStack){
     }
     std::cout << "####Finished Stack report####" << std::endl;
 }
+void outputCSV(std::stack<queen> csvStack){
+    std::ofstream outputFile;
+    outputFile.open("output.csv");
+    while(!csvStack.empty()){
+        outputFile << csvStack.top().columnX << "," << csvStack.top().rowY << "\n";
+        csvStack.pop();
+    }
+    outputFile.close();
+}
 
 int main(){
     int numOfQueens;
     std::cout << "Input an integer greater than 3: " << std::endl;
     std::cin >> numOfQueens;
     queenMain(numOfQueens);
+    system("python3 csvViewer.py");
 
     return 0;
 }
