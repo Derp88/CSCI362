@@ -175,6 +175,10 @@ bool compareMinThetas(occlusionObject first, occlusionObject second){
 }
 void sortOcclusionAngles(){
     std::sort(listOfOcclusion.begin(), listOfOcclusion.end(), compareMinThetas);
+    for (int i = 0; i < listOfOcclusion.size(); i++){
+       std::cout << "Min: " << listOfOcclusion[i].minTheta << "Max: " <<listOfOcclusion[i].maxTheta << std::endl;
+    }
+    
     listOfOcclusionNoOverlap.emplace_back(listOfOcclusion[0]);
     for (int i = 1; i < listOfOcclusion.size(); i++){
         if (listOfOcclusionNoOverlap.back().maxTheta < listOfOcclusion[i].minTheta){ //If our last value in our combined list is less than our current start value
@@ -187,7 +191,7 @@ void sortOcclusionAngles(){
         }
     }
 }
-/* Not used anymore, but keeping in to show previous method not using c++ build in sorting algo.
+ //Not used anymore, but keeping in to show previous method not using c++ build in sorting algo.
 void sortOcclusionAnglesOLD(){
     for (int curRect = 0; curRect < listOfOcclusion.size(); curRect++){
         for (int compRect = 0; compRect < listOfOcclusion.size(); compRect++){
@@ -213,7 +217,7 @@ void sortOcclusionAnglesOLD(){
             }
         }
     }
-}*/
+}
 void outputTotalOcclusionAngle(){
     sortOcclusionAngles();
     double totalAngle = 0;
@@ -222,15 +226,15 @@ void outputTotalOcclusionAngle(){
         totalAngle = totalAngle + displacment;
         std::cout << "Item [" << i << "]: MIN: " << listOfOcclusionNoOverlap[i].minTheta << " MAX: " << listOfOcclusionNoOverlap[i].maxTheta << " TOTAL: " << totalAngle <<std::endl;
     }
-    /* Old method, kept just in case. (Also works, just slower)
-    double totalAngleOLD = 0;
-    sortOcclusionAnglesOLD();
-    for (int i = 0; i < listOfOcclusion.size(); i++){
-        double displacmentOLD = listOfOcclusion[i].maxTheta - listOfOcclusion[i].minTheta;
-        totalAngleOLD = totalAngleOLD + displacmentOLD;
-    }
-    std::cout << "***Total Occlusion Angle is: " << totalAngleOLD << " OLD METHOD" << std::endl;
-    */
+    // Old method, kept just in case. (Also works, just slower)
+    //double totalAngleOLD = 0;
+    //sortOcclusionAnglesOLD();
+    //for (int i = 0; i < listOfOcclusion.size(); i++){
+    //    double displacmentOLD = listOfOcclusion[i].maxTheta - listOfOcclusion[i].minTheta;
+    //    totalAngleOLD = totalAngleOLD + displacmentOLD;
+    //}
+    //std::cout << "***Total Occlusion Angle Old is: " << totalAngleOLD << " OLD METHOD" << std::endl;
+    
     std::cout << "***Total Occlusion Angle is: " << totalAngle << std::endl;
 }
 
@@ -245,6 +249,7 @@ void printCircles(){
 }
 void outputShapeCSV(){
     std::ofstream outputFile;
+    
     outputFile.open("output.csv");
     for (int i = 0; i < listOfShapes.size(); i++){
         outputFile << listOfShapes[i].X << "," << listOfShapes[i].Y << "," << listOfShapes[i].radius << 
@@ -253,6 +258,21 @@ void outputShapeCSV(){
         "\n";
     }
     outputFile.close();
+    //New
+    std::ofstream outputFileAngle;
+    outputFileAngle.open("outputAngle.csv");
+    std::ofstream outputFileAngleSort;
+    outputFileAngleSort.open("outputAngleSort.csv");
+    for (int i = 0; i < listOfOcclusionNoOverlap.size(); i++){
+        
+        outputFileAngleSort << listOfOcclusionNoOverlap[i].minTheta << "," << listOfOcclusionNoOverlap[i].maxTheta << "\n";
+    }
+    for (int i = 0; i < listOfOcclusion.size(); i++){
+        outputFileAngle << listOfOcclusion[i].minTheta << "," << listOfOcclusion[i].maxTheta << "\n";
+    }
+        
+    outputFileAngle.close();
+    outputFileAngleSort.close();
 }
 bool inRange(double firstBound, double secondBound, double between){
     if (firstBound < secondBound){
@@ -276,6 +296,7 @@ int main(){
     outputTotalOcclusionAngle();
     outputShapeCSV();
     system("python3 csvViewer.py");
+    system("python3 csvViewerSorted.py");
 
     return 0;
 }

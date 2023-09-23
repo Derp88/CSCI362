@@ -12,7 +12,7 @@ with open(filename, 'r') as csvFile:
     for row in csvReader:
         rows.append(row)
 
-with open("outputAngle.csv", 'r') as csvFile:
+with open("outputAngleSort.csv", 'r') as csvFile:
     csvReader = csv.reader(csvFile)
     for rowAgnle in csvReader:
         rowsAngle.append(rowAgnle)
@@ -51,4 +51,4 @@ plt.plot(0,0, marker="x", color="red")
 plt.xlim(-275, 275)
 plt.ylim(-275, 275)
 plt.show()
-plt.savefig("outputRAW.png", dpi=600)
+plt.savefig("outputSorted.png", dpi=600)
