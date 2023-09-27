@@ -93,14 +93,15 @@ void printBST(node* rootNode, std::string path){
 int main(){
     rootNode.value = inputInts[15/2];
     buildBST(0,14);
-    std::cout << "Enter the kth smallest number you want to fin: ";
+    std::cout << "Enter the kth smallest number you want to find: ";
     std::cin >> kthSmallest;
 
-    findKthSmallest(&rootNode);
-    std::cout << "##############" << std::endl;
-    std::cout << "findKthSmallest was called: " << functionCalls << "  times" << std::endl;
-
     printBST(&rootNode, "root");
+    std::cout << "##############" << std::endl;
+
+    findKthSmallest(&rootNode);
+
+    std::cout << "findKthSmallest was called: " << functionCalls << "  times" << std::endl;
 
     destroyTree(rootNode.rightChild);
     destroyTree(rootNode.leftChild);
