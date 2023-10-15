@@ -1,9 +1,16 @@
 #include <iostream>
-#include <vector>
+//#include <vector>
+//#include <set>
+#include "node.h"
 
 //Vars
 int numOfInts;
 std::vector<int> listOfRandomInts;
+//Node
+//struct node{
+//    std::multiset<int> keys;
+//    std::vector<node*> listOfChildren;
+//};
 
 //Function prototypes
 void generateRandomInts();

@@ -1,8 +1,11 @@
-bTree: main.o
-	g++ -g main.o -o bTree
+bTree: main.o node.o
+	g++ -g main.o node.o -o bTree
 
-main.o: main.cpp
+main.o: main.cpp node.h
 	g++ -g -c main.cpp
+
+node.o: node.cpp node.h
+	g++ -g -c node.cpp
 
 clean:
 	rm *.o
