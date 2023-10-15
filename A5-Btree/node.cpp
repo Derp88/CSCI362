@@ -1,4 +1,5 @@
 #include "node.h"
+#include <algorithm>
 
 //Constructors
 Node::Node(){}
@@ -17,4 +18,7 @@ bool Node::isRoot(){
     }else{
         return false;
     }
+}
+void Node::sortKeys(){
+    std::sort(Node::keys.begin(), Node::keys.end());
 }

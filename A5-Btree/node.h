@@ -2,15 +2,16 @@
 #define NODE_H_EXISTS
 
 #include <vector>
-#include <set>
+//#include <set> //vector instead of multiset?
 class Node{
     public:
-        std::multiset<int> keys;
+        std::vector<int> keys; 
         std::vector<Node*> listOfChildren;
         Node* parentNode;
         Node();
         bool isLeaf();
         bool isRoot();
+        void sortKeys();
 };
 
 #endif
