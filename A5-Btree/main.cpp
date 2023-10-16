@@ -1,6 +1,6 @@
 #include <iostream>
-//#include <vector>
-//#include <set>
+#include <vector>
+#include <algorithm>
 #include "node.h"
 
 //Vars
@@ -74,10 +74,18 @@ void splitNode(Node* nodeToSplit){
     //Add our new child to the parent
     if (nodeToSplit->isRoot()){ //Only add the old node if we had to make a new root
         paretNodeOfSplit->listOfChildren.emplace_back(nodeToSplit); 
+        paretNodeOfSplit->listOfChildren.emplace_back(newChild); 
+    }else{
+        int splitNodeIndex = 0;
+        for (int i = 0; i < paretNodeOfSplit->listOfChildren.size() ; i++){
+            if (paretNodeOfSplit->listOfChildren.at(i) == nodeToSplit){
+                splitNodeIndex = i;
+            }
+        }
+        paretNodeOfSplit->listOfChildren.emplace(paretNodeOfSplit->listOfChildren.begin()+splitNodeIndex+1, newChild);
     }
     newChild->parentNode = paretNodeOfSplit;
     nodeToSplit->parentNode = paretNodeOfSplit;
-    paretNodeOfSplit->listOfChildren.emplace_back(newChild); 
     //Delete the median and everything greater/right of it from the old node
     for (int i = 0; i < medianIndex+1; i++){
         nodeToSplit->keys.pop_back();

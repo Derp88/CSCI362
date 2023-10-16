@@ -11,7 +11,6 @@ class Node{
         bool isLeaf();
         bool isRoot();
         void sortKeys();
-        void sortChildren();
         void printKeys();
 };
 
