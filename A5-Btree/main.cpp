@@ -87,6 +87,18 @@ void splitNode(Node* nodeToSplit){
     }
     newChild->parentNode = paretNodeOfSplit;
     nodeToSplit->parentNode = paretNodeOfSplit;
+    //If our node to split has children
+    if (!nodeToSplit->isLeaf()){
+        //Transfer the kids past the median to the new child node
+        for (int i = medianIndex+1; i < nodeToSplit->listOfChildren.size(); i++){
+            nodeToSplit->listOfChildren.at(i)->parentNode = newChild;
+            newChild->listOfChildren.emplace_back(nodeToSplit->listOfChildren.at(i));
+        }
+        //Delete the transfered children from the old now
+        for (int i = 0; i < medianIndex+1; i++){
+            nodeToSplit->listOfChildren.pop_back();
+        }   
+    }
     //Delete the median and everything greater/right of it from the old node
     for (int i = 0; i < medianIndex+1; i++){
         nodeToSplit->keys.pop_back();
