@@ -1,5 +1,6 @@
 #include "node.h"
 #include <algorithm>
+#include <iostream>
 
 //Constructors
 Node::Node(){
@@ -23,4 +24,15 @@ bool Node::isRoot(){
 }
 void Node::sortKeys(){
     std::sort(Node::keys.begin(), Node::keys.end());
+}
+void Node::sortChildren(){
+    //std::sort(Node::listOfChildren.begin(), Node::keys.end(),
+    //std::less<>)
+}
+void Node::printKeys(){
+    std::cout << "N: ";
+    for (int i = 0; i < Node::keys.size(); i++){
+        std::cout << Node::keys.at(i) << ", ";
+    }
+    std::cout << std::endl;
 }

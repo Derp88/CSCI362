@@ -7,6 +7,7 @@
 int numOfInts;
 std::vector<int> listOfRandomInts;
 Node* rootNode = new Node;
+const int treeOrderInt = 5;
 
 //Function prototypes
 void generateRandomInts();
@@ -28,28 +29,39 @@ void generateRandomInts(){
         int randomIndex = rand() % listOfAllPossibleInts.size();
         int randomInt = listOfAllPossibleInts.at(randomIndex);
         listOfRandomInts.emplace_back(randomInt);
+        std::cout << randomInt << ", ";
         //Delete the value we added to our random list from all list
         listOfAllPossibleInts.erase(listOfAllPossibleInts.begin() + randomIndex); 
     }
+    std::cout << std::endl;
 }
 
 void insertInt(int newNumber){
+    std::cout << "#########" << std::endl;
+    rootNode->printKeys();
+    for (int i=0; i < rootNode->listOfChildren.size(); i++){
+        std::cout << i << ": ";
+        rootNode->listOfChildren.at(i)->printKeys();
+    }
     //Find the corresponding leaf for the new number
     Node* newLeaf = findLeafForInt(rootNode, newNumber);
     newLeaf->keys.emplace_back(newNumber);
     newLeaf->sortKeys();
-    if (newLeaf->keys.size() > 4){ //We have inserted too many keys into a leaf
+    if (newLeaf->keys.size() > treeOrderInt-1){ //We have inserted too many keys into a leaf
         splitNode(newLeaf);
     }
 }
 void splitNode(Node* nodeToSplit){
-    int medianIndex = nodeToSplit->keys.size()/2;
+    nodeToSplit->sortKeys();
+    int medianIndex = (nodeToSplit->keys.size())/2;
     int median = nodeToSplit->keys.at(medianIndex);
     Node* paretNodeOfSplit;
     if (!nodeToSplit->isRoot()){ //If we are not root(aka we have a parent), promote the median to it
         paretNodeOfSplit = nodeToSplit->parentNode;
     }else{//We do not have a parent, so we must create a new parent.
+        std::cout << "### Making a new parent node." << std::endl;
         paretNodeOfSplit = new Node;
+        rootNode = paretNodeOfSplit; //This new parent is also the new root
     }
     //Add the new median to the parent, sort the parent
     paretNodeOfSplit->keys.emplace_back(median); 
@@ -60,10 +72,16 @@ void splitNode(Node* nodeToSplit){
         newChild->keys.emplace_back(nodeToSplit->keys.at(i));
     }
     //Add our new child to the parent
+    if (nodeToSplit->isRoot()){ //Only add the old node if we had to make a new root
+        paretNodeOfSplit->listOfChildren.emplace_back(nodeToSplit); 
+    }
     newChild->parentNode = paretNodeOfSplit;
-    newChild->parentNode->listOfChildren.emplace_back(newChild); 
+    nodeToSplit->parentNode = paretNodeOfSplit;
+    paretNodeOfSplit->listOfChildren.emplace_back(newChild); 
     //Delete the median and everything greater/right of it from the old node
-    nodeToSplit->keys.erase(nodeToSplit->keys.begin()+medianIndex, nodeToSplit->keys.end());
+    for (int i = 0; i < medianIndex+1; i++){
+        nodeToSplit->keys.pop_back();
+    }
 }
 
 Node* findLeafForInt(Node* searchNode, int searchNumber){
@@ -80,8 +98,13 @@ Node* findLeafForInt(Node* searchNode, int searchNumber){
         return findLeafForInt(searchNode->listOfChildren.at(subTreeCounter), searchNumber);
     }
 }
-void printTree(Node* rootNode, std::string path){
-    
+void printTree(Node* rootNode){
+    std::cout << "ROOT NODE: ";
+    rootNode->printKeys();
+    for (int i=0; i < rootNode->listOfChildren.size(); i++){
+        std::cout << i << ": ";
+        rootNode->listOfChildren.at(i)->printKeys();
+    }
 }
 
 int main(){
@@ -91,6 +114,7 @@ int main(){
     for (int i = 0; i < listOfRandomInts.size(); i++){
         insertInt(listOfRandomInts.at(i));
     }
+    printTree(rootNode);
 
     return 0;
 }

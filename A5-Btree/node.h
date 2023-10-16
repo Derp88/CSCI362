@@ -2,7 +2,6 @@
 #define NODE_H_EXISTS
 
 #include <vector>
-//#include <set> //vector instead of multiset?
 class Node{
     public:
         std::vector<int> keys; 
@@ -12,6 +11,8 @@ class Node{
         bool isLeaf();
         bool isRoot();
         void sortKeys();
+        void sortChildren();
+        void printKeys();
 };
 
 #endif
