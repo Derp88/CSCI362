@@ -120,7 +120,7 @@ void printTree(Node* searchNode, int level){
         printTree(searchNode->listOfChildren.at(i), level);
     }
 }
-printKeyIfExist(Node* searchNode, int key){
+void printKeyIfExist(Node* searchNode, int key){
     //TODO: Implement this
 }
 int main(){
