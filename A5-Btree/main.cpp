@@ -90,6 +90,11 @@ void splitNode(Node* nodeToSplit){
     for (int i = 0; i < medianIndex+1; i++){
         nodeToSplit->keys.pop_back();
     }
+    //Check to see if the parent node we inserted into now has too many key
+    if (paretNodeOfSplit->keys.size() > 4){
+        splitNode(paretNodeOfSplit);
+    }
+    
 }
 
 Node* findLeafForInt(Node* searchNode, int searchNumber){
@@ -106,12 +111,12 @@ Node* findLeafForInt(Node* searchNode, int searchNumber){
         return findLeafForInt(searchNode->listOfChildren.at(subTreeCounter), searchNumber);
     }
 }
-void printTree(Node* rootNode){
-    std::cout << "ROOT NODE: ";
-    rootNode->printKeys();
-    for (int i=0; i < rootNode->listOfChildren.size(); i++){
-        std::cout << i << ": ";
-        printTree(rootNode->listOfChildren.at(i));
+void printTree(Node* searchNode, int level){
+    searchNode->printKeys();
+    level++;
+    for (int i=0; i < searchNode->listOfChildren.size(); i++){
+        std::cout << level << ": ";
+        printTree(searchNode->listOfChildren.at(i), level);
         //rootNode->listOfChildren.at(i)->printKeys();
     }
 }
@@ -119,11 +124,17 @@ void printTree(Node* rootNode){
 int main(){
     std::cout << "Input an integer greater than or equal to 400: ";
     std::cin >> numOfInts;
+    int arrayOfSlideInts[20] = {1, 12, 8, 2, 25, 6, 14, 28, 17, 7, 52, 16, 48, 68, 3, 26, 29, 53, 55, 45};
+    std::vector<int> slideNoteInts;
+    slideNoteInts.insert(slideNoteInts.end(), &arrayOfSlideInts[0], &arrayOfSlideInts[20]);
     generateRandomInts();
-    for (int i = 0; i < listOfRandomInts.size(); i++){
+    /*for (int i = 0; i < listOfRandomInts.size(); i++){
         insertInt(listOfRandomInts.at(i));
+    }*/
+    for (int i = 0; i < slideNoteInts.size(); i++){
+        insertInt(slideNoteInts.at(i));
     }
-    printTree(rootNode);
+    printTree(rootNode, 0);
 
     return 0;
 }
