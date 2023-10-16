@@ -12,6 +12,7 @@ Node* rootNode = new Node;
 void generateRandomInts();
 void insertInt(int);
 Node* findLeafForInt(Node*, int);
+void splitNode(Node*);
 void printTree(Node*, std::string);
 
 void generateRandomInts(){
@@ -33,16 +34,43 @@ void generateRandomInts(){
 }
 
 void insertInt(int newNumber){
-    //
+    //Find the corresponding leaf for the new number
+    Node* newLeaf = findLeafForInt(rootNode, newNumber);
+    newLeaf->keys.emplace_back(newNumber);
+    newLeaf->sortKeys();
+    if (newLeaf->keys.size() > 4){ //We have inserted too many keys into a leaf
+        splitNode(newLeaf);
+    }
+}
+void splitNode(Node* nodeToSplit){
+    int medianIndex = nodeToSplit->keys.size()/2;
+    int median = nodeToSplit->keys.at(medianIndex);
+    Node* paretNodeOfSplit;
+    if (!nodeToSplit->isRoot){ //If we are not root(aka we have a parent), promote the median to it
+        paretNodeOfSplit = nodeToSplit->parentNode
+    }else{//We do not have a parent, so we must create a new parent.
+        paretNodeOfSplit = new Node;
+    }
+    //Add the new median to the parent, sort the parent
+    paretNodeOfSplit->keys.emplace_back(median); 
+    paretNodeOfSplit->sortKeys();
+    //Now to split the child in two
+    Node* newChild = new Node;
+    for (i = medianIndex + 1; i < nodeToSplit->keys.size(); i++){ //Add everything past the median to our new child node
+        newChild->keys.emplace_back(nodeToSplit->keys.at(i));
+    }
+    //Add our new child to the parent
+    newChild->parentNode = paretNodeOfSplit;
+    newChild->parentNode->listOfChildren.emplace_back(newChild); 
+    //Delete the median and everything greater/right of it from the old node
+    for (i = medianIndex; i < nodeToSplit->keys.size(); i++){ //Add everything past the median to our new child node
+        nodeToSplit->keys.erase(i);
+    }
 }
 
 Node* findLeafForInt(Node* searchNode, int searchNumber){
     searchNode->sortKeys(); //Make sure our keys are sorted
     if (searchNode->isLeaf()){
-        std::cout << "Node found with keys: " << std::endl;
-        for (int i = 0; i < searchNode->keys.size(); i++){
-            std::cout << searchNode->keys.at(i) << ", ";
-        }
         return searchNode;
     }else{
         int subTreeCounter = 0;
@@ -59,56 +87,12 @@ void printTree(Node* rootNode, std::string path){
 }
 
 int main(){
-    /*std::cout << "Input an integer greater than or equal to 400: ";
+    std::cout << "Input an integer greater than or equal to 400: ";
     std::cin >> numOfInts;
     generateRandomInts();
     for (int i = 0; i < listOfRandomInts.size(); i++){
-        insertInt(i);
-    }*/
-    rootNode->keys.emplace_back(17);
-
-    Node* leftChild = new Node;
-    leftChild->keys.emplace_back(3);
-    leftChild->keys.emplace_back(8);
-
-    Node* leftGrandchild1 = new Node;
-    leftGrandchild1->keys.emplace_back(1);
-    leftGrandchild1->keys.emplace_back(2);
-    Node* leftGrandchild2 = new Node;
-    leftGrandchild2->keys.emplace_back(6);
-    leftGrandchild2->keys.emplace_back(7);
-    Node* leftGrandchild3 = new Node;
-    leftGrandchild3->keys.emplace_back(12);
-    leftGrandchild3->keys.emplace_back(14);
-    leftGrandchild3->keys.emplace_back(16);
-    leftChild->listOfChildren.emplace_back(leftGrandchild1);
-    leftChild->listOfChildren.emplace_back(leftGrandchild2);
-    leftChild->listOfChildren.emplace_back(leftGrandchild3);
-
-    Node* rightChild = new Node;
-    rightChild->keys.emplace_back(28);
-    rightChild->keys.emplace_back(48);
-
-    Node* rightGrandchild1 = new Node;
-    rightGrandchild1->keys.emplace_back(25);
-    rightGrandchild1->keys.emplace_back(26);
-    Node* rightGrandchild2 = new Node;
-    rightGrandchild2->keys.emplace_back(29);
-    rightGrandchild2->keys.emplace_back(45);
-    Node* rightGrandchild3 = new Node;
-    rightGrandchild3->keys.emplace_back(52);
-    rightGrandchild3->keys.emplace_back(53);
-    rightGrandchild3->keys.emplace_back(55);
-    rightGrandchild3->keys.emplace_back(68);
-
-    rightChild->listOfChildren.emplace_back(rightGrandchild1);
-    rightChild->listOfChildren.emplace_back(rightGrandchild2);
-    rightChild->listOfChildren.emplace_back(rightGrandchild3);
-
-    rootNode->listOfChildren.emplace_back(leftChild);
-    rootNode->listOfChildren.emplace_back(rightChild);
-
-    findLeafForInt(rootNode, 17);
+        insertInt(listOfRandomInts.at(i));
+    }
 
     return 0;
 }

@@ -2,7 +2,9 @@
 #include <algorithm>
 
 //Constructors
-Node::Node(){}
+Node::Node(){
+    Node::parentNode = nullptr;
+}
 
 //Methods
 bool Node::isLeaf(){
