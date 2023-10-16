@@ -37,12 +37,12 @@ void generateRandomInts(){
 }
 
 void insertInt(int newNumber){
-    std::cout << "#########" << std::endl;
+    /*std::cout << "#########" << std::endl;
     rootNode->printKeys();
     for (int i=0; i < rootNode->listOfChildren.size(); i++){
         std::cout << i << ": ";
         rootNode->listOfChildren.at(i)->printKeys();
-    }
+    }*/
     //Find the corresponding leaf for the new number
     Node* newLeaf = findLeafForInt(rootNode, newNumber);
     newLeaf->keys.emplace_back(newNumber);
@@ -111,7 +111,8 @@ void printTree(Node* rootNode){
     rootNode->printKeys();
     for (int i=0; i < rootNode->listOfChildren.size(); i++){
         std::cout << i << ": ";
-        rootNode->listOfChildren.at(i)->printKeys();
+        printTree(rootNode->listOfChildren.at(i));
+        //rootNode->listOfChildren.at(i)->printKeys();
     }
 }
 
