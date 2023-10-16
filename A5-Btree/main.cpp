@@ -46,8 +46,8 @@ void splitNode(Node* nodeToSplit){
     int medianIndex = nodeToSplit->keys.size()/2;
     int median = nodeToSplit->keys.at(medianIndex);
     Node* paretNodeOfSplit;
-    if (!nodeToSplit->isRoot){ //If we are not root(aka we have a parent), promote the median to it
-        paretNodeOfSplit = nodeToSplit->parentNode
+    if (!nodeToSplit->isRoot()){ //If we are not root(aka we have a parent), promote the median to it
+        paretNodeOfSplit = nodeToSplit->parentNode;
     }else{//We do not have a parent, so we must create a new parent.
         paretNodeOfSplit = new Node;
     }
@@ -56,16 +56,14 @@ void splitNode(Node* nodeToSplit){
     paretNodeOfSplit->sortKeys();
     //Now to split the child in two
     Node* newChild = new Node;
-    for (i = medianIndex + 1; i < nodeToSplit->keys.size(); i++){ //Add everything past the median to our new child node
+    for (int i = medianIndex + 1; i < nodeToSplit->keys.size(); i++){ //Add everything past the median to our new child node
         newChild->keys.emplace_back(nodeToSplit->keys.at(i));
     }
     //Add our new child to the parent
     newChild->parentNode = paretNodeOfSplit;
     newChild->parentNode->listOfChildren.emplace_back(newChild); 
     //Delete the median and everything greater/right of it from the old node
-    for (i = medianIndex; i < nodeToSplit->keys.size(); i++){ //Add everything past the median to our new child node
-        nodeToSplit->keys.erase(i);
-    }
+    nodeToSplit->keys.erase(nodeToSplit->keys.begin()+medianIndex, nodeToSplit->keys.end());
 }
 
 Node* findLeafForInt(Node* searchNode, int searchNumber){
