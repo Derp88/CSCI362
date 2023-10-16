@@ -21,6 +21,3 @@ m = 5
 3. All non-leaf leaf nodes (besides the root) have at least 3 children
 4. Root node is a leaf or has 2 to 5 children
 5. A leaf node contains no more than 4 keys
-
-https://cplusplus.com/reference/set/multiset/
-https://cplusplus.com/reference/set/multiset/swap/

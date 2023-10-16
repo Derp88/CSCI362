@@ -15,6 +15,7 @@ void insertInt(int);
 Node* findLeafForInt(Node*, int);
 void splitNode(Node*);
 void printTree(Node*, std::string);
+void printKeyIfExist(Node*, int);
 
 void generateRandomInts(){
     int upperBound = numOfInts * 3;
@@ -112,15 +113,16 @@ Node* findLeafForInt(Node* searchNode, int searchNumber){
     }
 }
 void printTree(Node* searchNode, int level){
+    std::cout <<"Level " <<level << ": ";
     searchNode->printKeys();
     level++;
     for (int i=0; i < searchNode->listOfChildren.size(); i++){
-        std::cout << level << ": ";
         printTree(searchNode->listOfChildren.at(i), level);
-        //rootNode->listOfChildren.at(i)->printKeys();
     }
 }
-
+printKeyIfExist(Node* searchNode, int key){
+    //TODO: Implement this
+}
 int main(){
     std::cout << "Input an integer greater than or equal to 400: ";
     std::cin >> numOfInts;
@@ -132,9 +134,13 @@ int main(){
         insertInt(listOfRandomInts.at(i));
     }
     //for (int i = 0; i < slideNoteInts.size(); i++){
-    //    insertInt(slideNoteInts.at(i));
+    //   insertInt(slideNoteInts.at(i));
     //}
     printTree(rootNode, 0);
+    for (int i = numOfInts; i < numOfInts*2 ; i++){
+        printKeyIfExist(rootNode, i);
+    }
+    
 
     return 0;
 }
