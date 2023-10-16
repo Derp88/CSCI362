@@ -113,32 +113,69 @@ Node* findLeafForInt(Node* searchNode, int searchNumber){
     }
 }
 void printTree(Node* searchNode, int level){
-    std::cout <<"Level " <<level << ": ";
+    //Find what index the node is
+    int index = 0;
+    if(!searchNode->isRoot()){
+        for (int i = 0; i < searchNode->parentNode->listOfChildren.size(); i++){
+            if (searchNode->parentNode->listOfChildren.at(i) == searchNode){
+                index = i;
+            }
+        }
+    }
+    std::cout <<"Level " << level << " index " << index << ": " ;
     searchNode->printKeys();
+    std::cout << "       Parent is: "; 
+    if(!searchNode->isRoot()){
+        searchNode->parentNode->printKeys();
+    }
+    std::cout << "                 Children are: "; 
+    if(!searchNode->isLeaf()){
+        for (int i = 0; i < searchNode->listOfChildren.size(); i++){
+            searchNode->listOfChildren.at(i)->printKeys();
+        }
+    }
+    std::cout << std::endl;
     level++;
     for (int i=0; i < searchNode->listOfChildren.size(); i++){
         printTree(searchNode->listOfChildren.at(i), level);
     }
 }
 void printKeyIfExist(Node* searchNode, int key){
-    //TODO: Implement this
+    int subTreeCounter = 0;
+    //Check and see if the current node has the key
+    std::vector<int>::iterator it;
+    it = std::find(searchNode->keys.begin(), searchNode->keys.end(), key);
+    if (it != searchNode->keys.end()){
+        std::cout << "Found: " << key << std::endl;
+    }
+
+
+    for (int i = 0; i < searchNode->keys.size(); i++){
+        if (key > searchNode->keys.at(subTreeCounter)){
+            subTreeCounter++;
+        }
+    }
+    //If we are not a leaf, search the subtree
+    if(!searchNode->isLeaf()){
+        printKeyIfExist(searchNode->listOfChildren.at(subTreeCounter), key);
+    }
 }
 int main(){
     std::cout << "Input an integer greater than or equal to 400: ";
     std::cin >> numOfInts;
-    //int arrayOfSlideInts[20] = {1, 12, 8, 2, 25, 6, 14, 28, 17, 7, 52, 16, 48, 68, 3, 26, 29, 53, 55, 45};
-    //std::vector<int> slideNoteInts;
-    //slideNoteInts.insert(slideNoteInts.end(), &arrayOfSlideInts[0], &arrayOfSlideInts[20]);
+    int arrayOfSlideInts[20] = {1, 12, 8, 2, 25, 6, 14, 28, 17, 7, 52, 16, 48, 68, 3, 26, 29, 53, 55, 45};
+    std::vector<int> slideNoteInts;
+    slideNoteInts.insert(slideNoteInts.end(), &arrayOfSlideInts[0], &arrayOfSlideInts[20]);
     generateRandomInts();
-    for (int i = 0; i < listOfRandomInts.size(); i++){
-        insertInt(listOfRandomInts.at(i));
-    }
-    //for (int i = 0; i < slideNoteInts.size(); i++){
-    //   insertInt(slideNoteInts.at(i));
+    //for (int i = 0; i < listOfRandomInts.size(); i++){
+    //    insertInt(listOfRandomInts.at(i));
     //}
+    for (int i = 0; i < slideNoteInts.size(); i++){
+       insertInt(slideNoteInts.at(i));
+    }
     printTree(rootNode, 0);
     for (int i = numOfInts; i < numOfInts*2 ; i++){
-        printKeyIfExist(rootNode, i);
+        //printKeyIfExist(rootNode, i);
     }
     
 

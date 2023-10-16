@@ -30,5 +30,4 @@ void Node::printKeys(){
     for (int i = 0; i < Node::keys.size(); i++){
         std::cout << Node::keys.at(i) << ", ";
     }
-    std::cout << std::endl;
 }
