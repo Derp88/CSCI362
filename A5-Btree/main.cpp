@@ -39,12 +39,6 @@ void generateRandomInts(){
 }
 
 void insertInt(int newNumber){
-    /*std::cout << "#########" << std::endl;
-    rootNode->printKeys();
-    for (int i=0; i < rootNode->listOfChildren.size(); i++){
-        std::cout << i << ": ";
-        rootNode->listOfChildren.at(i)->printKeys();
-    }*/
     //Find the corresponding leaf for the new number
     Node* newLeaf = findLeafForInt(rootNode, newNumber);
     newLeaf->keys.emplace_back(newNumber);
@@ -155,17 +149,15 @@ void printTree(Node* searchNode, int level){
         printTree(searchNode->listOfChildren.at(i), level);
     }
 }
-//This doesn't work
 void printKeyIfExist(Node* searchNode, int key){
     int subTreeCounter = 0;
     //Check and see if the current node has the key
     std::vector<int>::iterator it;
     it = std::find(searchNode->keys.begin(), searchNode->keys.end(), key);
     if (it != searchNode->keys.end()){
-        std::cout << "Found: " << key << std::endl;
+        std::cout << key << ", ";
     }
-
-
+    //Find what subtree we should go to next
     for (int i = 0; i < searchNode->keys.size(); i++){
         if (key > searchNode->keys.at(subTreeCounter)){
             subTreeCounter++;
@@ -179,22 +171,16 @@ void printKeyIfExist(Node* searchNode, int key){
 int main(){
     std::cout << "Input an integer greater than or equal to 400: ";
     std::cin >> numOfInts;
-    //int arrayOfSlideInts[20] = {1, 12, 8, 2, 25, 6, 14, 28, 17, 7, 52, 16, 48, 68, 3, 26, 29, 53, 55, 45};
-    //std::vector<int> slideNoteInts;
-    //slideNoteInts.insert(slideNoteInts.end(), &arrayOfSlideInts[0], &arrayOfSlideInts[20]);
     generateRandomInts();
     for (int i = 0; i < listOfRandomInts.size(); i++){
         insertInt(listOfRandomInts.at(i));
     }
-    //for (int i = 0; i < slideNoteInts.size(); i++){
-    //   insertInt(slideNoteInts.at(i));
-    //}
     printTree(rootNode, 0);
-    std::cout << "Found vales (Not working/broke right now)" << std::endl;
-    for (int i = numOfInts; i < numOfInts*2 ; i++){
+    std::cout << "Found vales" << std::endl;
+    for (int i = numOfInts; i < (numOfInts*2)+1 ; i++){
         printKeyIfExist(rootNode, i);
     }
-    
+    std::cout << std::endl;
 
     return 0;
 }

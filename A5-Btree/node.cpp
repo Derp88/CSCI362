@@ -26,8 +26,9 @@ void Node::sortKeys(){
     std::sort(Node::keys.begin(), Node::keys.end());
 }
 void Node::printKeys(){
-    std::cout << "N: ";
+    std::cout << "N:{ ";
     for (int i = 0; i < Node::keys.size(); i++){
         std::cout << Node::keys.at(i) << ", ";
     }
+    std::cout << "}";
 }
