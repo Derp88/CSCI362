@@ -9,7 +9,7 @@ clean:
 	rm dictionary
 
 run: dictionary
-	./dictionary
+	./dictionary Dictionary.txt
 
 debug: dictionary
 	gdb dictionary
