@@ -3,9 +3,11 @@
 #include <algorithm>
 #include <fstream>
 #include <cctype>
+#include <cstdlib>
 #include "TimeInterval.h"
 
 std::vector<std::string> hashTable[26];
+std::string altWord;
 
 //Function prototypes
 int hashWord(std::string);
@@ -14,6 +16,7 @@ void loadDict(std::string);
 
 bool searchTable(std::string);
 void searchIndex2Letters(std::string);
+bool searchTableSimilar(std::string);
 
 
 int hashWord(std::string inputWord){ //Input should be lowercase
@@ -38,10 +41,8 @@ void loadDict(std::string filename){
 bool searchTable(std::string inputWord){ //AKA Case 1 check
     int hashTableIndex = hashWord(inputWord);
     if (hashTable[hashTableIndex].end() != std::find(hashTable[hashTableIndex].begin(), hashTable[hashTableIndex].end(), inputWord)){
-        std::cout << "TRUE | Found: " << inputWord << std::endl;
         return true;
     }else{
-        std::cout << "FALSE | Could not find: " << inputWord << std::endl;
         return false;
     }
 }
@@ -60,16 +61,75 @@ void searchIndex2Letters(std::string inputWord){
         }
     }
 }
+bool searchTableSimilar(std::string inputWord){
+    int inputLength = inputWord.size();
+    int hashTableIndex = hashWord(inputWord);
+    std::vector<std::string> alternatives;
+    std::vector<std::string> alternativesRightSize;
+    alternatives = hashTable[hashTableIndex];
+    for(int i = 0; i < alternatives.size(); i++){
+        int alternativeLength = alternatives[i].size();
+        if(std::abs(alternativeLength - inputLength) < 2){ //Add to new list of valid size options
+            alternativesRightSize.emplace_back(alternatives[i]);
+        }
+    }
+    //If there are alts with the right size, continue, else, return false
+    switch(alternativesRightSize.size()){
+        case 0: //No matches
+            return false;
+        case 1: //1 word match
+            altWord = alternativesRightSize[0];
+            return true;
+        default: //More than one word matches
+            std::vector<int> numOfSameLetters; //Is a vector that matches alternativesRightSize and gives each entry a score on how many letters are the same.
+            for (int i = 0; i < alternativesRightSize.size(); i++){ //For every possible word
+                numOfSameLetters.emplace_back(0); //Initalize the score values to 0
+                for (int j = 0; j < alternativesRightSize[i].size(); j++){//For evey letter in the alt word
+                    //If the letter in the alt word is present in the input word, increase numOfSameLetters by one
+                    if(inputWord.find(alternativesRightSize[i].at(j)) != std::string::npos){
+                        //std::cout << "For word: " << alternativesRightSize[i] <<" Found the letter: " << alternativesRightSize[i].at(j) << " inside of " << inputWord << std::endl;
+                        numOfSameLetters[i]++; //Increase score
+                    }
+                }
+            }
+            //Find the highest scoring index. The alt word at the same index is the true suggestion.
+            int largestIndex = 0;
+            for (int i = 0; i < numOfSameLetters.size(); i++){
+                if(numOfSameLetters[i] > numOfSameLetters[largestIndex]){
+                    largestIndex = i;
+                }
+            }
+            altWord = alternativesRightSize[largestIndex];
+
+            return true;
+    }
+    
+}
 
 int main(int argc, char *argv[]){
     std::string inputFileName(argv[1]);
     loadDict(inputFileName);
 
     std::string inputWord;
+    std::string choice;
     std::cout << "Please enter a word" << std::endl;
     std::cin >> inputWord;
     if (searchTable(inputWord)){ //Search the table for the word
-        searchIndex2Letters(inputWord);
+        std::cout << "TRUE | Found: " << inputWord << std::endl;
+        searchIndex2Letters(inputWord); //Case 1
+    }else{
+        if (searchTableSimilar(inputWord)){
+            std::cout << "Did you mean " << altWord << "?  (yes or no)"<< std::endl;
+            std::cin >> choice;
+            if(choice == "yes"){
+                std::cout << "TRUE | Found: " << altWord << std::endl;
+                searchIndex2Letters(altWord);
+            }else{
+                std:: cout << "False | Invalid alternative word" << std::endl;
+            }
+        }else{
+            std::cout  << "False | Could not find: " << inputWord << std::endl;
+        }
     }
 
     return 0;
