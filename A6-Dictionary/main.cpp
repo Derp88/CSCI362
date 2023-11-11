@@ -20,7 +20,7 @@ bool searchTableSimilar(std::string);
 
 
 int hashWord(std::string inputWord){ //Input should be lowercase
-    return int(inputWord[0])-97;
+    return int(inputWord[0])-97; //97 is the ASCII value for lowercase a
 }
 
 void insertIntoTable(std::string inputWord){
@@ -131,6 +131,6 @@ int main(int argc, char *argv[]){
             std::cout  << "False | Could not find: " << inputWord << std::endl;
         }
     }
-
+    
     return 0;
 }
