@@ -112,7 +112,7 @@ int main(int argc, char *argv[]){
 
     std::string inputWord;
     std::string choice;
-    std::cout << "Please enter a word" << std::endl;
+    std::cout << "Please enter a word (lowercase letters only)" << std::endl;
     std::cin >> inputWord;
     if (searchTable(inputWord)){ //Search the table for the word
         std::cout << "TRUE | Found: " << inputWord << std::endl;
